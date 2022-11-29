@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prism-server-deployment
+  labels:
+    app: prism-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: prism-server
+  template:
+    metadata:
+      labels:
+        app: prism-server
+    spec:
+      containers:
+        - name: prism-server
+          image: registry.git.wthack.de/dsp/prism/prism-server:latest
+          ports:
+            - containerPort: 80
+          env:
+              - name: RUST_LOG
+                value: "prism_server_lib=info,prism_server=info"
+              - name: DATABASE
+                valueFrom:
+                  secretKeyRef:
+                    name: prism-server
+                    key: dburi
+                    optional: false
+              - name: ESI_CLIENT_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: prism-server
+                    key: esi-client-id
+                    optional: false
+              - name: ESI_SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: prism-server
+                    key: esi-secret
+                    optional: false
+              - name: ESI_CALLBACK
+                valueFrom:
+                  secretKeyRef:
+                    name: prism-server
+                    key: esi-callback
+                    optional: false
+      imagePullSecrets:
+        - name: regcred
+
